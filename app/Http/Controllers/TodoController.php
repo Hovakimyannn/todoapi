@@ -36,7 +36,7 @@ class TodoController extends Controller
 
     public function store(Request $request)
     {
-        $content = $request->toArray()['todo'];
+        $content = $request->todo;
         if ($content) {
             Redis::set('updated',true);
             Todo::create([
@@ -50,15 +50,14 @@ class TodoController extends Controller
 
     public function update(Request $request)
     {
-        $reqTodo = $request->toArray();
-        if (!$dbTodo = Todo::find($reqTodo['id'])) {
+        if (!$dbTodo = Todo::find($request->id)) {
             return response(false);
         }
-        if ($reqTodo['todo'] == null) {
+        if ($request->todo == null) {
             return $this->remove($request);
         }
         $oldTodo = $dbTodo->todo;
-        $newTodo = $reqTodo['todo'];
+        $newTodo = $request->todo;
         if (strcmp($newTodo, $oldTodo) != 0) {
             Redis::set('updated',true);
             $dbTodo->update([
@@ -73,10 +72,9 @@ class TodoController extends Controller
 
     public function remove(Request $request)
     {
-        $id = $request->toArray()['id'];
-        if ($todo = Todo::find($id)) {
+        if ($todo = Todo::find($request->id)) {
             Redis::set('updated',true);
-            $todo->delete($id);
+            $todo->delete();
             return response(true);
         } else {
             return response(false);
