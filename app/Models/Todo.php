@@ -15,9 +15,4 @@ class Todo extends Model
     protected $fillable = [
         'todo'
     ];
-
-    public function todos()
-    {
-
-    }
 }
