@@ -42,16 +42,22 @@ class TodoController extends Controller
             Todo::create([
                 'todo' => $content,
             ]);
-            return response(true);
+            return response([
+                "status_code" => 201,
+            ]);
         } else {
-            return response(false);
+            return response([
+                "status_code" => 400,
+            ]);
         }
     }
 
     public function update(Request $request)
     {
         if (!$dbTodo = Todo::find($request->id)) {
-            return response(false);
+            return response([
+                "status_code" => 400,
+            ]);
         }
         if ($request->todo == null) {
             return $this->remove($request);
@@ -64,9 +70,13 @@ class TodoController extends Controller
                 'todo' => $newTodo,
                 'updated_at' => date('Y/m/d H:i:s'),
             ]);
-            return response(true);
+            return response([
+                "status_code" => 200,
+            ]);
         } else {
-            return response(false);
+            return response([
+                "status_code" => 304,
+            ]);
         }
     }
 
@@ -75,9 +85,13 @@ class TodoController extends Controller
         if ($todo = Todo::find($request->id)) {
             Redis::set('updated',true);
             $todo->delete();
-            return response(true);
+            return response([
+                "status_code" => 204,
+            ]);
         } else {
-            return response(false);
+            return response([
+                "status_code" => 405,
+            ]);
         }
     }
 }
