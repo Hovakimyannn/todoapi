@@ -8,10 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Todo extends Model
 {
     use HasFactory;
+    public $timestamps = false;
 
-    /**
-     * @var string[]
-     */
     protected $fillable = [
         'todo'
     ];
