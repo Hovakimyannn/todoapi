@@ -4,43 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\Todo;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
 
-class TodoController extends Controller
+class TodoController extends BaseController
 {
     public function getAll()
     {
-        if ($cachedTodoList = Redis::get('todolist')) {
-            $todoList = json_decode($cachedTodoList);
-            return response()->json([
-                'status_code' => 200,
-                'message' => 'Fetched all data from redis',
-                'data' => $todoList,
-            ]);
-        }
-
-        $todoList = Todo::all()->toArray();
-        $json = json_encode($todoList);
-        Redis::set('todolist', $json);
-
+        $todoList = $this->service->getAll();
         return response()->json([
             'status_code' => 200,
-            'message' => 'Fetched all data from database',
             'data' => $todoList,
         ]);
 
     }
 
-    public function create(Request $request)
+    public function store(Request $request)
     {
-        $content = trim($request->json('todo'));
-
-        if ($content) {
-            Redis::del('todolist');
-            Todo::create([
-                'todo' => $content,
-            ]);
-            $id = Todo::query()->orderBy('id', 'desc')->first()->id;
+        if ($id = $this->service->store($request)) {
             return response([
                 "status_code" => 201,
                 "id" => $id,
@@ -50,7 +29,6 @@ class TodoController extends Controller
         return response([
             "status_code" => 400,
         ]);
-
     }
 
     public function update(Request $request)
@@ -62,11 +40,7 @@ class TodoController extends Controller
         }
 
         if ($request->json('status')) {
-            Redis::del('todolist');
-            $current_status = $dbTodo/*->where('id', $request->json('id'))->first()*/->status;
-            $dbTodo->
-            /*where('id', '=', $request->json('id'))->*/
-            update(['status' => ($current_status = $current_status == 0 ? 1 : 0)]);
+            $current_status = $this->service->updateStatus($dbTodo);
             return response([
                 "status_code" => 200,
                 "status" => $current_status,
@@ -79,16 +53,7 @@ class TodoController extends Controller
             ]);
         }
 
-
-        $oldTodo = $dbTodo->todo;
-        $newTodo = $request->json('todo');
-
-        if (strcmp($newTodo, $oldTodo) != 0) {
-            Redis::del('todolist');
-            $dbTodo->update([
-                'todo' => $newTodo,
-            ]);
-
+        if ($this->service->updateData($dbTodo, $request)) {
             return response([
                 "status_code" => 200,
             ]);
@@ -99,15 +64,14 @@ class TodoController extends Controller
         ]);
     }
 
-    public function delete(Request $request)
+    public function destroy(Request $request)
     {
-        if ($todo = Todo::find($request->json('id'))) {
-            Redis::del('todolist');
-            $todo->delete();
+        if ($this->service->destroy($request)) {
             return response([
                 "status_code" => 204,
             ]);
         }
+
         return response([
             "status_code" => 405,
         ]);
