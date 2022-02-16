@@ -12,7 +12,7 @@ use Illuminate\Support\Traits\Macroable;
 abstract class Connection
 {
     use Macroable {
-        __call as macroCall;
+        Macroable::__call as macroCall;
     }
 
     /**

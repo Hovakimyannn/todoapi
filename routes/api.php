@@ -18,4 +18,4 @@ Route::get('/get-all', [TodoController::class,'getAll']);
 Route::post('/create',[TodoController::class, 'create']);
 Route::patch('/update',[TodoController::class,'update']);
 Route::delete('/delete',[TodoController::class,'delete']);
-Route::patch('/status',[TodoController::class,'status']);
+//Route::patch('/status',[TodoController::class,'status']);

@@ -11,6 +11,8 @@ class Todo extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'todo'
+        'todo',
+        'status',
+        'id'
     ];
 }
